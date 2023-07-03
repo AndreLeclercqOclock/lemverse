@@ -19,4 +19,4 @@ COPY ./core $APP_SOURCE_FOLDER/core/
 
 WORKDIR $APP_SOURCE_FOLDER
 
-CMD ["meteor", "--unsafe-perm", "--settings", "settings-dev.json"]
+CMD ["meteor", "--unsafe-perm", "--settings", "settings.json"]
