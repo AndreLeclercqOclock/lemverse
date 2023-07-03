@@ -2,6 +2,7 @@ version: "3.8"
 services:
   mongodb:
     image: mongo:5.0.3
+    container_name: mongodb
     environment:
       - PUID=1000
       - PGID=1000
@@ -22,9 +23,9 @@ services:
       - net_lemverse
     depends_on:
       - mongodb
+      - peer
     ports:
       - '3000:3000' # Expose web port to see your change
-      - '7010:7010' # expose peer port
     volumes:
       - lemverse:/var/tmp/lemverse # Necessary volume for upload tileset and keep them between restart
       - ./app:/opt/src # mount local dir to allow hot reload
@@ -32,6 +33,31 @@ services:
     environment:
       ROOT_URL: ${APP_ROOT_URL:-http://localhost}
       MONGO_URL: mongodb://mongodb:27017/meteor
+  peer:
+    image: peerjs/peerjs-server:0.6.1
+    container_name: peer
+    restart: unless-stopped
+    networks:
+      - net_lemverse
+    command: [ "--port", "9000", "--path", "/peer" ]
+  caddy:
+    image: caddy/caddy:alpine
+    restart: unless-stopped
+    container_name: caddy
+    environment:
+      FRONTEND_HOST: app.desinvo.lt
+      PEER_HOST: peer.desinvo.lt
+      FRONTEND_SERVICE: lemverse
+      PEER_SERVICE: peer
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - net_lemverse
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy:/data/caddy:z
+      
 volumes:
   lemverse:
     driver: local 
