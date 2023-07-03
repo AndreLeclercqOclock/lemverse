@@ -61,6 +61,8 @@ services:
 volumes:
   lemverse:
     driver: local 
+  caddy:
+    driver: local
   db:
     driver: local
   
